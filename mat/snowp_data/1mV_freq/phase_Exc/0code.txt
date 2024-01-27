@@ -1,0 +1,29 @@
+%% 改变离子机制时，
+
+mat_dir = addPaths;
+datafold = fullfile(mat_dir, 'snowp_data');
+Sec_restVm_25cells = load(fullfile(datafold, 'Sec_restVm_25cells.mat'));
+Sec_restVm_25cells = Sec_restVm_25cells.Sec_restVm;
+
+Sec_restVm_25cells_exc = load(fullfile(datafold, 'Sec_restVm_inh_25cells.mat'));
+Sec_restVm_25cells_exc = Sec_restVm_25cells_exc.Sec_restVm;
+
+polar_fold = fullfile(mat_dir, "snowp_data/1mV_freq/phase_inh");
+polar_foldnew = fullfile(mat_dir, "snowp_data/1mV_freq/phase_inhn");
+for i=1:25
+    cell_id = i;
+    data = load(fullfile(polar_fold, sprintf('polarization_cell%g', cell_id)));
+    Edirect = data.Edirect;
+    list_f = data.list_f;
+    polarize_phase = data.polarize_phase;
+    polarize_freq = data.polarize_freq;
+
+    tempdata = cell(100, 1);
+    for m=1:100
+        tempdata{m, 1} = polarize_freq{m, 1} + Sec_restVm_25cells{cell_id, 1}(1:length(polarize_freq{m, 1}), 1) - Sec_restVm_25cells_exc{cell_id, 1};
+    end
+    polarize_freq = tempdata;
+    
+    savefile = fullfile(polar_foldnew, sprintf('polarization_cell%g', cell_id));
+    save(savefile, "polarize_freq","polarize_phase","list_f","Edirect");
+end
